@@ -63,13 +63,19 @@ public class ZuulServlet extends HttpServlet {
     @Override
     public void service(javax.servlet.ServletRequest servletRequest, javax.servlet.ServletResponse servletResponse) throws ServletException, IOException {
         try {
+            // 初始化当前的zuul request context，将request和response放入上下文中
             init((HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse);
 
             // Marks this request as having passed through the "Zuul engine", as opposed to servlets
             // explicitly bound in web.xml, for which requests will not have the same data attached
             RequestContext context = RequestContext.getCurrentContext();
             context.setZuulEngineRan();
-
+            //////////////// zuul对请求的处理流程 start  ////////////////
+            // 以下几个try块部分是zuul对一个请求的处理流程：pre -> route -> post
+            // 可以看到：
+            // 1. post是必然执行的（可以类比finally块），但如果在post中抛出了异常，交由error处理完后就结束，避免无限循环
+            // 2. 任何阶段抛出了ZuulException，都会交由error处理
+            // 3. 非ZuulException会被封装后交给error处理
             try {
                 preRoute();
             } catch (ZuulException e) {
@@ -94,6 +100,7 @@ public class ZuulServlet extends HttpServlet {
         } catch (Throwable e) {
             error(new ZuulException(e, 500, "UNHANDLED_EXCEPTION_" + e.getClass().getName()));
         } finally {
+            // 此次请求完成，移除相应的上下文对象
             RequestContext.getCurrentContext().unset();
         }
     }

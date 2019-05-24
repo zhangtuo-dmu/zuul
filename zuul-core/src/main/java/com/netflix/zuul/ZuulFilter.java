@@ -95,7 +95,7 @@ public abstract class ZuulFilter implements IZuulFilter, Comparable<ZuulFilter> 
 
     /**
      * If true, the filter has been disabled by archaius and will not be run
-     *
+     * 禁用Filter的逻辑例如：zuul.PreDecorationFilter.pre.disabled=true
      * @return
      */
     public boolean isFilterDisabled() {
@@ -110,11 +110,13 @@ public abstract class ZuulFilter implements IZuulFilter, Comparable<ZuulFilter> 
      */
     public ZuulFilterResult runFilter() {
         ZuulFilterResult zr = new ZuulFilterResult();
+        // 当前filter是否被禁用
         if (!isFilterDisabled()) {
             if (shouldFilter()) {
                 Tracer t = TracerFactory.instance().startMicroTracer("ZUUL::" + this.getClass().getSimpleName());
                 try {
                     Object res = run();
+                    //包装结果
                     zr = new ZuulFilterResult(res, ExecutionStatus.SUCCESS);
                 } catch (Throwable e) {
                     t.setName("ZUUL::" + this.getClass().getSimpleName() + " failed");

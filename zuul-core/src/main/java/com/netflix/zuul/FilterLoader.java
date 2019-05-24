@@ -57,6 +57,9 @@ public class FilterLoader {
     private final ConcurrentHashMap<String, Long> filterClassLastModified = new ConcurrentHashMap<String, Long>();
     private final ConcurrentHashMap<String, String> filterClassCode = new ConcurrentHashMap<String, String>();
     private final ConcurrentHashMap<String, String> filterCheck = new ConcurrentHashMap<String, String>();
+    /**
+     * Filter load中 根据类型加载分组filter，filter来源Filter ： FilterRegistry
+     */
     private final ConcurrentHashMap<String, List<ZuulFilter>> hashFiltersByType = new ConcurrentHashMap<String, List<ZuulFilter>>();
 
     private FilterRegistry filterRegistry = FilterRegistry.instance();

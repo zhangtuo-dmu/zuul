@@ -38,6 +38,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
+ * 过滤器处理器
  * This the the core class to execute filters.
  *
  * @author Mikey Cohen
@@ -150,8 +151,10 @@ public class FilterProcessor {
             Debug.addRoutingDebug("Invoking {" + sType + "} type filters");
         }
         boolean bResult = false;
+        // 通过FilterLoader获取指定类型的所有filter
         List<ZuulFilter> list = FilterLoader.getInstance().getFiltersByType(sType);
         if (list != null) {
+            // 这里没有进行try...catch... 意味着只要任何一个filter执行失败了整个过程就会中断掉
             for (int i = 0; i < list.size(); i++) {
                 ZuulFilter zuulFilter = list.get(i);
                 Object result = processZuulFilter(zuulFilter);
@@ -174,11 +177,13 @@ public class FilterProcessor {
 
         RequestContext ctx = RequestContext.getCurrentContext();
         boolean bDebug = ctx.debugRouting();
+        //无用
         final String metricPrefix = "zuul.filter-";
         long execTime = 0;
         String filterName = "";
         try {
             long ltime = System.currentTimeMillis();
+            //过滤器名
             filterName = filter.getClass().getSimpleName();
             
             RequestContext copy = null;
@@ -189,9 +194,10 @@ public class FilterProcessor {
                 Debug.addRoutingDebug("Filter " + filter.filterType() + " " + filter.filterOrder() + " " + filterName);
                 copy = ctx.copy();
             }
-            
+            //执行结果和执行状态
             ZuulFilterResult result = filter.runFilter();
             ExecutionStatus s = result.getStatus();
+            //执行时间
             execTime = System.currentTimeMillis() - ltime;
 
             switch (s) {
@@ -212,7 +218,8 @@ public class FilterProcessor {
             }
             
             if (t != null) throw t;
-
+            // 触发一个filter usage回调
+            // 当前notifier的实现固定是BasicFilterUsageNotifier，通过Servo统计filter的调用
             usageNotifier.notify(filter, s);
             return o;
 
@@ -224,7 +231,10 @@ public class FilterProcessor {
             if (e instanceof ZuulException) {
                 throw (ZuulException) e;
             } else {
+                //包装成zuulException
                 ZuulException ex = new ZuulException(e, "Filter threw Exception", 500, filter.filterType() + ":" + filterName);
+                // 如果在line35之前抛出了异常，这个execTime的值会是0
+                // 不过ZuulFilter.runFilter()中做了try...catch...处理，理论上来说不会出现异常
                 ctx.addFilterExecutionSummary(filterName, ExecutionStatus.FAILED.name(), execTime);
                 throw ex;
             }

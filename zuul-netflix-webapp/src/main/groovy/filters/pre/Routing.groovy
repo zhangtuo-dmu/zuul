@@ -26,6 +26,7 @@ import com.netflix.zuul.context.RequestContext
 import com.netflix.zuul.exception.ZuulException
 
 /**
+ * Routing过滤器判断是将请求路由到静态资源还是其它服务。
  * @author Mikey Cohen
  * Date: 1/23/13
  * Time: 2:03 PM

@@ -44,6 +44,9 @@ public class NFRequestContext extends RequestContext {
 
 
     static {
+        /**
+         * 只要加载了类NFRequestContext，应用中所有RequestContext的实例都将是NFRequestContext类型。
+         */
         RequestContext.setContextClass(NFRequestContext.class);
 
     }

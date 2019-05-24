@@ -67,7 +67,10 @@ public class ZuulRunner {
      * @param servletResponse
      */
     public void init(HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
-
+        // wrap request并缓存其body
+        // 所谓buffer是指将其内容缓存起来，使得可以安全地重复调用getReader(), getInputStream()等方法
+        // 因为一般来说，流操作一次之后就不能重复操作了
+        // 类com.netflix.zuul.http.HttpServletRequestWrapper注释上有详解
         RequestContext ctx = RequestContext.getCurrentContext();
         if (bufferRequests) {
             ctx.setRequest(new HttpServletRequestWrapper(servletRequest));

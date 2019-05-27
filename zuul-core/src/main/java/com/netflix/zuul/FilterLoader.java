@@ -53,19 +53,21 @@ public class FilterLoader {
     final static FilterLoader INSTANCE = new FilterLoader();
 
     private static final Logger LOG = LoggerFactory.getLogger(FilterLoader.class);
-
+    //缓存filter最后的修改时间
     private final ConcurrentHashMap<String, Long> filterClassLastModified = new ConcurrentHashMap<String, Long>();
+    //缓存filter名称->filter的代码映射
     private final ConcurrentHashMap<String, String> filterClassCode = new ConcurrentHashMap<String, String>();
+    //记录filter是否已经被加载
     private final ConcurrentHashMap<String, String> filterCheck = new ConcurrentHashMap<String, String>();
     /**
      * Filter load中 根据类型加载分组filter，filter来源Filter ： FilterRegistry
      */
     private final ConcurrentHashMap<String, List<ZuulFilter>> hashFiltersByType = new ConcurrentHashMap<String, List<ZuulFilter>>();
-
+    //filterRegistry的单例，负责filter的全局存储
     private FilterRegistry filterRegistry = FilterRegistry.instance();
 
     static DynamicCodeCompiler COMPILER;
-    
+    //生成filter实例的工厂类
     static FilterFactory FILTER_FACTORY = new DefaultFilterFactory();
 
     /**
@@ -139,6 +141,7 @@ public class FilterLoader {
     /**
      * From a file this will read the ZuulFilter source code, compile it, and add it to the list of current filters
      * a true response means that it was successful.
+     * 从一个文件中，read出filter的源代码，编译它，并将其添加到当前过滤器列表中。
      *
      * @param file
      * @return true if the filter in file successfully read, compiled, verified and added to Zuul

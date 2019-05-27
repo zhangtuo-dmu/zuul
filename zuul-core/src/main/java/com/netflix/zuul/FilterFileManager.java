@@ -53,6 +53,7 @@ public class FilterFileManager {
     Thread poller;
     boolean bRunning = true;
 
+    //以什么文件结尾？ 例如.groovy
     static FilenameFilter FILENAME_FILTER;
 
     static FilterFileManager INSTANCE;
@@ -67,7 +68,7 @@ public class FilterFileManager {
     /**
      * Initialized the GroovyFileManager.
      *
-     * @param pollingIntervalSeconds the polling interval in Seconds
+     * @param pollingIntervalSeconds the polling interval in Seconds 多少秒进行轮训
      * @param directories            Any number of paths to directories to be polled may be specified
      * @throws IOException
      * @throws IllegalAccessException
@@ -75,10 +76,13 @@ public class FilterFileManager {
      */
     public static void init(int pollingIntervalSeconds, String... directories) throws Exception, IllegalAccessException, InstantiationException {
         if (INSTANCE == null) INSTANCE = new FilterFileManager();
-
+        //文件夹路径 ["src/main/groovy/filters/pre", "src/main/groovy/filters/route", "src/main/groovy/filters/post"]
         INSTANCE.aDirectories = directories;
+        //轮训时间
         INSTANCE.pollingIntervalSeconds = pollingIntervalSeconds;
+        //按照文件夹路径扫出以.groovy文件结尾的文件数组，然后通过FilterLoader读取filter，并放入filter到内存中。
         INSTANCE.manageFiles();
+        //一直轮训的线程
         INSTANCE.startPoller();
 
     }
@@ -140,7 +144,7 @@ public class FilterFileManager {
 
     /**
      * Returns a List<File> of all Files from all polled directories
-     *
+     * 遍历文件夹，根据文件夹路径读取
      * @return
      */
     List<File> getFiles() {
@@ -148,6 +152,7 @@ public class FilterFileManager {
         for (String sDirectory : aDirectories) {
             if (sDirectory != null) {
                 File directory = getDirectory(sDirectory);
+                //读出文件夹，然后扫出以.groovy文件结尾的文件
                 File[] aFiles = directory.listFiles(FILENAME_FILTER);
                 if (aFiles != null) {
                     list.addAll(Arrays.asList(aFiles));
